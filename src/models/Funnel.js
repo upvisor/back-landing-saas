@@ -13,11 +13,8 @@ const stepSchema = new mongoose.Schema({
 
 const FunnelSchema = new mongoose.Schema({
     funnel: { type: String, required: true, unique: true },
-    subdomain: { type: String, required: true },
     description: { type: String },
     service: { type: String },
-    metaTitle: { type: String },
-    metaDescription: { type: String },
     steps: [stepSchema]
 }, {
     timestamps: true
