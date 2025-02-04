@@ -1,8 +1,12 @@
 import mongoose from 'mongoose'
 
 const ShopLoginSchema = new mongoose.Schema({
+    name: { type: String },
     email: { type: String, required: true },
-    password: { type: String, required: true, select: false }
+    password: { type: String, required: true, select: false },
+    type: { type: String, required: true },
+    permissions: [{ type: String }],
+    plan: { type: String }
 }, {
     timestamps: true
 })

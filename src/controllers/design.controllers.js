@@ -3,12 +3,13 @@ import Funnel from '../models/Funnel.js'
 import ClientTag from '../models/ClientTag.js'
 import ClientData from '../models/ClientData.js'
 import Service from '../models/Service.js'
+import Style from '../models/Style.js'
 
 export const createDesign = async (req, res) => {
     try {
         const design = await Design.findOne()
         if (design) {
-            await Design.findByIdAndDelete(design._id)
+            await Design.findByIdAndUpdate(design._id, req.body, { new: true })
         }
         const newDesign = new Design(req.body)
         await newDesign.save()
@@ -92,14 +93,14 @@ export const getPagesFunnels = async (req, res) => {
             return res.json(page)
         } else {
             const funnels = await Funnel.find()
-            if (funnels.map(funnel => funnel.steps.find(step => req.params.id === step.slug)).length && funnels.map(funnel => funnel.steps.find(step => req.params.id === step.slug))[0] && funnels.map(funnel => funnel.steps.find(step => req.params.id === step.slug))[0].step) {
-                const step = funnels.map(funnel => funnel.steps.find(step => req.params.id === step.slug))
-                return res.json(step[0])
+            if (funnels.find(funnel => funnel.steps.find(step => req.params.id === step.slug))) {
+                const step = funnels.find(funnel => funnel.steps.find(step => req.params.id === step.slug)).steps.find(step => step.slug === req.params.id)
+                return res.json(step)
             } else {
                 const services = await Service.find()
                 if (services.map(service => service.steps.find(step => req.params.id === step.slug))) {
-                    const step = services.map(service => service.steps.find(step => req.params.id === step.slug))
-                    return res.json(step[0])
+                    const step = services.find(service => service.steps.find(step => req.params.id === step.slug)).steps.find(step => step.slug === req.params.id)
+                    return res.json(step)
                 }
             }
         }
@@ -153,7 +154,34 @@ export const createDefaultPages = async (req, res) => {
         await newDataEmail.save()
         const newDataPhone = new ClientData({ name: 'Teléfono', data: 'phone' })
         await newDataPhone.save()
+        const newStyle = new Style({ design: 'Borde', form: 'Cuadradas', primary: '#0071e3', button: '#ffffff' })
+        await newStyle.save()
         return res.json(newDesignSave)
+    } catch (error) {
+        return res.status(500).json({message: error.message})
+    }
+}
+
+export const createStyle = async (req, res) => {
+    try {
+        const style = await Style.findOne()
+        if (style) {
+            const updateStyle = await Style.findByIdAndUpdate(style._id, req.body, { new: true })
+            return res.json(updateStyle)
+        } else {
+            const newStyle = new Style(req.body)
+            const newStyleSave = await newStyle.save()
+            return res.json(newStyleSave)
+        }
+    } catch (error) {
+        return res.status(500).json({message: error.message})
+    }
+}
+
+export const getStyle = async (req, res) => {
+    try {
+        const style = await Style.findOne()
+        return res.json(style)
     } catch (error) {
         return res.status(500).json({message: error.message})
     }

@@ -6,6 +6,7 @@ import cron from 'node-cron'
 import ClientData from '../models/ClientData.js'
 import StoreData from '../models/StoreData.js'
 import Task from '../models/Task.js'
+import Style from '../models/Style.js'
 
 export const createAutomatization = async (req, res) => {
     try {
@@ -61,7 +62,8 @@ export const createAutomatization = async (req, res) => {
                 });
                 const clientData = await ClientData.find()
                 const storeData = await StoreData.find()
-                sendEmail({ subscribers: filteredSubscribers, emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: newAutomatizationSave._id })
+                const style = await Style.findOne()
+                sendEmail({ subscribers: filteredSubscribers, emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: newAutomatizationSave._id, style: style })
             } else {
                 let subscribers = []
                 if (startType === 'Formulario completado') {
@@ -102,7 +104,8 @@ export const createAutomatization = async (req, res) => {
                     });
                     const clientData = await ClientData.find()
                     const storeData = await StoreData.find()
-                    sendEmail({ subscribers: filteredSubscribers, emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: newAutomatizationSave._id })
+                    const style = await Style.findOne()
+                    sendEmail({ subscribers: filteredSubscribers, emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: newAutomatizationSave._id, style: style })
                 })
             }
         })

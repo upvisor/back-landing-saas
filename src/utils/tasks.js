@@ -4,6 +4,7 @@ import ClientData from '../models/ClientData.js'
 import StoreData from '../models/StoreData.js'
 import cron from 'node-cron'
 import { sendEmail } from '../utils/sendEmail.js'
+import Style from '../models/Style.js'
 
 export const loadTasks = async () => {
     const tasks = await Task.find()
@@ -22,10 +23,11 @@ export const loadTasks = async () => {
                     if (tagsCondition && funnelOrServiceCondition) {
                         const clientData = await ClientData.find();
                         const storeData = await StoreData.find();
-                        sendEmail({ subscribers: [client], emailData: task.emailData, clientData: clientData, storeData: storeData[0], automatizationId: task.automatizationId });
+                        const style = await Style.find();
+                        sendEmail({ subscribers: [client], emailData: task.emailData, clientData: clientData, storeData: storeData[0], automatizationId: task.automatizationId, style: style[0] });
                     }
                 }
-            } else {
+            } else if (task.subscribers.length) {
                 const emails = task.subscribers;
                 const updatedSubscribers = await Client.find({ email: { $in: emails } }).lean()
                 const filteredSubscribers = updatedSubscribers.filter(subscriber => {
@@ -41,8 +43,15 @@ export const loadTasks = async () => {
                 if (filteredSubscribers.length > 0) {
                     const clientData = await ClientData.find()
                     const storeData = await StoreData.find()
-                    sendEmail({ subscribers: filteredSubscribers, emailData: task.emailData, clientData: clientData, storeData: storeData[0], automatizationId: task.automatizationId })
+                    const style = await Style.findOne()
+                    sendEmail({ subscribers: filteredSubscribers, emailData: task.emailData, clientData: clientData, storeData: storeData[0], automatizationId: task.automatizationId, style: style })
                 }
+            } else {
+                const subscribers = await Client.find({ tags: task.startValue }).lean()
+                const clientData = await ClientData.find()
+                const storeData = await StoreData.find()
+                const style = await Style.findOne()
+                sendEmail({ subscribers: subscribers, emailData: task.emailData, clientData: clientData, storeData: storeData[0], automatizationId: task.automatizationId, style: style })
             }
         })
     })

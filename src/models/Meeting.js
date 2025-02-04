@@ -7,12 +7,14 @@ const MeetingSchema = new mongoose.Schema({
     phone: { type: Number },
     meeting: { type: String, required: true },
     date: { type: Date, required: true },
-    url: { type: String, required: true },
+    url: { type: String },
     data: [{ name: { type: String }, value: { type: String } }],
     service: { type: String },
     stepService: { type: String },
     funnel: { type: String },
-    step: { type: String }
+    step: { type: String },
+    calendar: { type: String },
+    type: { type: String }
 }, {
     timestamps: true
 })

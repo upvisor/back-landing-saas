@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 const CallSchema = new mongoose.Schema({
+    type: { type: String },
     nameMeeting: { type: String, required: true, unique: true },
     title: { type: String },
     duration: { type: String },
@@ -11,7 +12,8 @@ const CallSchema = new mongoose.Schema({
     tags: [{ type: String }],
     action: { type: String },
     message: { type: String },
-    redirect: { type: String }
+    redirect: { type: String },
+    calendar: { type: String }
 }, {
     timestamps: true
 })

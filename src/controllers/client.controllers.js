@@ -6,6 +6,7 @@ import { formatDateToCron } from '../utils/cronFormat.js'
 import cron from 'node-cron'
 import ClientData from '../models/ClientData.js'
 import Task from '../models/Task.js'
+import Style from '../models/Style.js'
 
 export const createClient = async (req, res) => {
   try {
@@ -96,7 +97,8 @@ export const createClient = async (req, res) => {
             ) {
               const clientData = await ClientData.find();
               const storeData = await StoreData.find();
-              sendEmail({ subscribers: [client], emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: automatization._id });
+              const style = await Style.findOne()
+              sendEmail({ subscribers: [client], emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: automatization._id, style: style });
             }
           } else {
             const dateCron = formatDateToCron(new Date(email.date));
@@ -115,7 +117,7 @@ export const createClient = async (req, res) => {
               if (clientUpdate) {
                 const tagsCondition =
                   (email.condition.length === 0 && !client.tags.includes('desuscrito')) ||
-                  (client.condition.some(tag => !client.tags.includes(tag) || !client.tags.includes('desuscrito')));
+                  (client.condition.some(tag => !clientUpdate.tags.includes(tag) || !clientUpdate.tags.includes('desuscrito')));
                 let funnelOrServiceCondition = true;
                 if (automatization.startType === 'Añadido a una etapa de un embudo') {
                   funnelOrServiceCondition = clientUpdate.funnels.some(funnel => funnel.step === automatization.startValue);
@@ -125,7 +127,8 @@ export const createClient = async (req, res) => {
                 if (tagsCondition && funnelOrServiceCondition) {
                   const clientData = await ClientData.find();
                   const storeData = await StoreData.find();
-                  sendEmail({ subscribers: [clientUpdate], emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: automatization._id });
+                  const style = await Style.findOne()
+                  sendEmail({ subscribers: [clientUpdate], emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: automatization._id, style: style });
                 }
               }
             });
@@ -184,7 +187,8 @@ export const createClient = async (req, res) => {
             ) {
               const clientData = await ClientData.find();
               const storeData = await StoreData.find();
-              sendEmail({ subscribers: [newClientSave], emailData: email, storeData: storeData[0], clientData: clientData, automatizationId: automatization._id });
+              const style = await Style.findOne()
+              sendEmail({ subscribers: [newClientSave], emailData: email, storeData: storeData[0], clientData: clientData, automatizationId: automatization._id, style: style });
             }
           } else {
             const dateCron = formatDateToCron(new Date(email.date));
@@ -201,9 +205,7 @@ export const createClient = async (req, res) => {
             cron.schedule(dateCron, async () => {
               const clientUpdate = await Client.findOne({ email: newClient.email }).lean();
               if (clientUpdate) {
-                const tagsCondition =
-                  (email.condition.length === 0 && !client.tags.includes('desuscrito')) ||
-                  (client.condition.some(tag => !client.tags.includes(tag) || !client.tags.includes('desuscrito')));
+                const tagsCondition = (email.condition.length === 0 && !clientUpdate.tags.includes('desuscrito')) || (clientUpdate.condition.some(tag => !clientUpdate.tags.includes(tag) || !clientUpdate.tags.includes('desuscrito')));
                 let funnelOrServiceCondition = true;
                 if (automatization.startType === 'Añadido a una etapa de un embudo') {
                   funnelOrServiceCondition = clientUpdate.funnels.some(funnel => funnel.step === automatization.startValue);
@@ -213,7 +215,8 @@ export const createClient = async (req, res) => {
                 if (tagsCondition && funnelOrServiceCondition) {
                   const clientData = await ClientData.find();
                   const storeData = await StoreData.find();
-                  sendEmail({ subscribers: [clientUpdate], emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: automatization._id });
+                  const style = await Style.findOne()
+                  sendEmail({ subscribers: [clientUpdate], emailData: email, clientData: clientData, storeData: storeData[0], automatizationId: automatization._id, style: style });
                 }
               }
             });
@@ -261,11 +264,7 @@ export const updateClientEmail = async (req, res) => {
 export const getClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id)
-
-    if (!client) {
-      return undefined
-    }
-
+    if (!client) return res.json({meesage: 'Not Found'})
     return res.send(client)
   } catch (error) {
     return res.status(500).json({message: error.message})
@@ -275,7 +274,7 @@ export const getClient = async (req, res) => {
 export const getClientByEmail = async (req, res) => {
   try {
     const client = await Client.findOne({ email: req.params.id }).lean()
-    if (!client) return res.sendStatus(404)
+    if (!client) return res.json({meesage: 'Not Found'})
     return res.send(client)
   } catch (error) {
     return res.status(500).json({message: error.message})
