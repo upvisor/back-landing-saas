@@ -19,11 +19,14 @@ const DesignSchema = new mongoose.Schema({
         topStrip: { type: String },
         bgColor: { type: String },
         textColor: { type: String },
-        logo: { type: String }
+        logo: { type: String },
+        bgColorTop: { type: String },
+        textColorTop: { type: String },
     },
     footer: {
         bgColor: { type: String },
-        textColor: { type: String }
+        textColor: { type: String },
+        funnelText: { type: String }
     },
     chat: {
         bgColor: { type: String }
